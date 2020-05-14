@@ -51,11 +51,12 @@ class Chat(QWidget):
         server.bind(('', port))
         server.listen(5)
         print(port, 'SRV', server)
+        sock, addr = server.accept()
         while True:  # while True:
-            sock, addr = server.accept()
             name = pickle.loads(sock.recv(1024))
             sock.send(pickle.dumps(0))
             msg = pickle.loads(sock.recv(1024))
+            sock.send(pickle.dumps(0))
             self.messages.addItem("[{}]: {}".format(name, msg))
 
 
@@ -71,9 +72,11 @@ class Chat(QWidget):
 
     def send_msg(self):
         msg = self.text_input.toPlainText()
+        self.text_input.setText("")
         self.client.send(pickle.dumps(self.name))
         self.client.recv(1024)
         self.client.send(pickle.dumps(msg))
+        self.client.recv(1024)
         self.messages.addItem("[{}]: {}".format(self.name, msg))
 
 
