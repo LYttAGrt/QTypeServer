@@ -19,21 +19,18 @@ class Message(QWidget):
         self.setLayout(self.vbox)
 
 
-
 class Chat(QWidget):
-    def __init__(self, addr, port, name, self_port=10005):
+    def __init__(self):
         super(Chat, self).__init__()
-        self.server = Thread(target=self.start_server, args=[self_port])
+        self.port = 20000
+        self.addr = ""
+        self.name = ""
+        self.server = Thread(target=self.start_server, args=[self.port])
         self.server.start()
-        self.client = self.start_client(addr, port)
-        self.name = name
+        self.client = None
+        # self.name = name
         self.vbox = QVBoxLayout()
         self.messages = QListWidget()
-        text = "[{}]: {}".format("Dapimex", "Hello")
-        msg = QListWidgetItem(text)
-        self.messages.addItem(msg)
-        # msg_widget = Message(sender="Dapimex", message="Hello")
-        # self.messages.setItemWidget(msg, msg_widget)
         self.vbox.addWidget(self.messages)
         self.hbox = QHBoxLayout()
         self.vbox.addLayout(self.hbox)
@@ -44,7 +41,11 @@ class Chat(QWidget):
         self.hbox.addWidget(self.send_btn)
         self.setLayout(self.vbox)
 
+    def set_name(self, name):
+        self.name = name
 
+    def set_addr(self, addr):
+        self.addr = addr
 
     def start_server(self, port):
         server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -59,16 +60,15 @@ class Chat(QWidget):
             sock.send(pickle.dumps(0))
             self.messages.addItem("[{}]: {}".format(name, msg))
 
-
-    def start_client(self, addr, port):
+    def start_client(self):
         input("Launch client?")
-        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            client.connect((addr, port))
+            self.client.connect((self.addr, self.port))
         except ConnectionError as e:
             print(e)
         finally:
-            return client
+            return
 
     def send_msg(self):
         msg = self.text_input.toPlainText()
@@ -82,6 +82,9 @@ class Chat(QWidget):
 
 if __name__ == '__main__':
     app = QApplication([])
-    chat = Chat(addr='', port=10006, name="Alex", self_port=10005)
+    chat = Chat()
+    chat.set_addr("")
+    chat.set_name("Dapimex")
+    chat.start_client()
     chat.show()
     app.exec_()
