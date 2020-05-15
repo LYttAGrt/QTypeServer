@@ -103,7 +103,7 @@ def rename_user():
 def register_addr():
     status = request.args.get(key='status', default=False)
     cur_alias = request.args.get(key='alias', default='DNS')
-    user_addr, user_port = request.remote_addr, request.environ.get('REMOTE_PORT')
+    user_addr, user_port = request.remote_addr, request.args.get(key='port', default='20000')
     return dns.register_addr(alias=cur_alias, addr=user_addr, status=status, port=user_port), 200
 
 
